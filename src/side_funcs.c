@@ -4,34 +4,24 @@
 #include <math.h>
 #include "../include/side_funcs.h"
 
-int pow_of_2(int exp)
-{
-    int res = 1;
-    for (int i = 0; i < exp; i++)
-    {
-        res *= 2;
-    }
-    return res;
-}
-
 /*-------------------------------------------- uint16_t_to_binstring -
 | Convert string to UTF-8 binary encoded string 
 | [ "abcd" --> "01100001 01100010 01100011 01100100" ]
 *--------------------------------------------------------------------*/
-char *str_to_binstr(char *string)
+char *str_to_binstr(char *str)
 {
-    char *res = (char *)malloc(8 * strlen(string) * sizeof(char) + 1);
+    char *res = (char *)malloc(8 * strlen(str) * sizeof(char) + 1);
     *res = '\0';
 
     int bit;
     char buff[9];
     buff[8] = '\0';
 
-    for (int i = 0; i < strlen(string); i++)
+    for (int i = 0; i < strlen(str); i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            bit = (string[i] & (1 << (7 - j))) >> (7 - j);
+            bit = (str[i] & (1 << (7 - j))) >> (7 - j);
             buff[j] = bit + 48; // ascii conversion
         }
         strcat(res, buff);

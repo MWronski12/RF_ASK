@@ -45,9 +45,9 @@ char *str_to_binstr(char *string)
 
 int main()
 {
-    char *name = "ab";
-    char *name_bin = str_to_binstr(name);
-    printf("%s", name_bin);
+    char *name = (char *)malloc(5);
+    *(name + 4) = '\0';
+    printf("%s", name);
 
     return 1;
 }

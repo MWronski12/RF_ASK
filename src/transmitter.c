@@ -42,30 +42,31 @@ void tx_1(int pin)
 }
 
 /*-------------------------------------------- tx_1 -----------------
-| Encode message
+| Encode message: string -> binary string -> dc balanced binary string
 *-------------------------------------------------------------------*/
-char *encode(char *message, int len, int encoding)
+char *encode(char *str, int encoding)
 {
+    char *buff = str_to_binstr(str);
+    int len = strlen(buff);
+
     if (encoding == MANCHESTER)
     {
-        char *encoded_msg = (char *)malloc(2 * len * sizeof(char));
+        char *encoded = (char *)malloc(2 * len * sizeof(char) + 1);
+        *encoded = '\0';
         for (int i = 0; i < 2 * len; i++)
         {
-            if (message[i] == '1')
+            if (buff[i] == '1')
             {
-                encoded_msg[i] = '1';
-                encoded_msg[i + 1] = '0';
+                strcat(encoded, "10");
             }
-            else
+            else if (buff[i] == '0')
             {
-                encoded_msg[i] = '0';
-                encoded_msg[i + 1] = '1';
+                strcat(encoded, "01");
             }
         }
-        return encoded_msg;
+        free(buff);
+        return encoded;
     }
-    // TODO
-    // Other encoding schemes
 }
 
 /*-------------------------------------------- fcs ------------------
@@ -76,19 +77,28 @@ void append_fcs();
 /*-------------------------------------------- message --------------
 | Manchester encode array of bits for DC balanced signal transmission
 *-------------------------------------------------------------------*/
-char *insert_encoded_message();
+char *insert_encoded_msg(frame *frame_buff, char *encoded_msg)
+{
+    for (int i = 0; i < strlen(encoded_msg); i++)
+    {
+        append(&frame_buff->payload, encoded_msg[i]);
+    }
+}
 
 /*-------------------------------------------- from_id --------------
 | Insert ID of a sender to frame buffer
 *-------------------------------------------------------------------*/
-int insert_from_id();
+int insert_from_id(frame *frame_buff)
+{
+    frame_buff->from_id = 6969;
+}
 
 /*-------------------------------------------- msg_len --------------
 | Calculate and insert message length to frame buffer
 *-------------------------------------------------------------------*/
-int insert_msg_len(char *msg)
+int insert_msg_len(frame *frame_buff, char *encoded_msg)
 {
-    
+    frame_buff->length = strlen(encoded_msg);
 }
 
 /*-------------------------------------------- start_symbol ---------
@@ -110,7 +120,17 @@ void insert_preamble(frame *frame_buff)
 /*---------------------------------------------- assemble_packet ----
 | Assemble verified data frame for transmission
 *-------------------------------------------------------------------*/
-char assemble_frame();
+char assemble_frame(frame *frame_buff, char *msg)
+{
+    char *encoded_msg = encode(msg, MANCHESTER);
+
+    insert_preamble(frame_buff);
+    insert_start_symbol(frame_buff);
+    insert_msg_len(frame_buff, encoded_msg);
+    insert_encoded_msg(frame_buff, encoded_msg);
+
+}
+
 
 /*---------------------------------------------- transmit -----------
 | Transmit string of MAX_MSG_LEN max length
