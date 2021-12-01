@@ -15,24 +15,29 @@ int pow_of_2(int exp)
 }
 
 /*-------------------------------------------- uint16_t_to_binstring -
-| RETURNS uint16_t NUMBER TO BINARY STRING REPRESENTATION
+| Convert string to UTF-8 binary encoded string 
+| [ "abcd" --> "01100001 01100010 01100011 01100100" ]
 *--------------------------------------------------------------------*/
-char *char_to_binarystr(char character)
+char *str_to_binstr(char *string)
 {
-    char str[8] = (char*)malloc(9 * sizeof(char));
-    for (int i = 0; i < 8; i++)
+    char *res = (char *)malloc(8 * strlen(string) * sizeof(char) + 1);
+    *res = '\0';
+
+    int bit;
+    char buff[9];
+    buff[8] = '\0';
+
+    for (int i = 0; i < strlen(string); i++)
     {
-        if (character / pow_of_2(7 - i) == 1)
+        for (int j = 0; j < 8; j++)
         {
-            str[i] = '1';
-            character -= pow_of_2(7 - i);
+            bit = (string[i] & (1 << (7 - j))) >> (7 - j);
+            buff[j] = bit + 48; // ascii conversion
         }
-        else
-        {
-            str[i] = '0';
-        }
+        strcat(res, buff);
     }
-    return str;
+
+    return res;
 }
 
 /*-------------------------------------------- u_timestamp -----------
